@@ -1,20 +1,21 @@
 import { assign, createActor, setup } from "xstate";
-import { Settings, speechstate } from "speechstate";
+import type { Settings } from "speechstate";
+import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
-import { DMContext, DMEvents } from "./types";
+import type { DMContext, DMEvents } from "./types";
 
 const inspector = createBrowserInspector();
 
 const azureCredentials = {
   endpoint:
-    "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+    "https://YOUR_REGION.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
   key: KEY,
 };
 
 const settings: Settings = {
   azureCredentials: azureCredentials,
-  azureRegion: "northeurope",
+  azureRegion: "YOUR_REGION",
   asrDefaultCompleteTimeout: 0,
   asrDefaultNoInputTimeout: 5000,
   locale: "en-US",
@@ -48,12 +49,10 @@ function getPerson(utterance: string) {
 
 const dmMachine = setup({
   types: {
-    /** you might need to extend these */
     context: {} as DMContext,
     events: {} as DMEvents,
   },
   actions: {
-    /** define your actions here */
     "spst.speak": ({ context }, params: { utterance: string }) =>
       context.spstRef.send({
         type: "SPEAK",
