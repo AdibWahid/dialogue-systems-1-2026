@@ -82,7 +82,7 @@ Take a greater effort and take it to next level. And SSML has a lot of tools. Be
 Sources for inspiration:
 - [California Dreaming](https://www.youtube.com/watch?v=IZYoGj8D8pY) (386DX art project).
 - [Without Me](https://raw.githubusercontent.com/vladmaraev/rasa101/master/withoutme.m4a), by Robert Rhys Thomas in 2019 for this course.
-- Bad Guy, by Fang Yuan in 2020 for this course (check out the media folder).
+- [Bad Guy](https://raw.githubusercontent.com/GU-CLASP/dialogue-systems-1-2026/main/labs/lab4/media/partC_badguy_voiced.mp3), by Fang Yuan in 2020 for this course.
 
 ## Submission
 
