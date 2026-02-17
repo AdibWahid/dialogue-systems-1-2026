@@ -201,5 +201,5 @@ export function setupButton(element: HTMLButtonElement) {
   dmActor.subscribe((snapshot) => {
     const meta: { view?: string } = Object.values(snapshot.context.spstRef.getSnapshot().getMeta())[0] || { view: undefined };
     element.innerHTML = `${meta.view}`;
-  });
+  })
 }
