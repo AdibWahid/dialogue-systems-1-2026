@@ -122,9 +122,9 @@ choose =appointment=. (When you re-train the model later on, select
 1. As we have said, you can copy stuff from Lab 3.
 
 2. Configure your NLU by adding the following to your files:
-   - create a ~NLU_KEY~ const in your =azure.js= file and import it
+   - create a ~NLU_KEY~ const in your =azure.ts= file and import it
      (together with your ~KEY~).
-   - In =dm4.js=, create the object "azureLanguageCredentials":
+   - In =dm.ts=, create the object "azureLanguageCredentials":
      #+begin_src javascript
 
        const azureLanguageCredentials = {
