@@ -9,13 +9,13 @@ const inspector = createBrowserInspector();
 
 const azureCredentials = {
   endpoint:
-    "https://YOUR_REGION.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+    "https://swedencentral.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
   key: KEY,
 };
 
 const settings: Settings = {
   azureCredentials: azureCredentials,
-  azureRegion: "YOUR_REGION",
+  azureRegion: "swedencentral",
   asrDefaultCompleteTimeout: 0,
   asrDefaultNoInputTimeout: 5000,
   locale: "en-US",
@@ -127,8 +127,20 @@ const dmMachine = setup({
           } in the grammar.`,
         }),
       },
-      on: { SPEAK_COMPLETE: "Done" },
+      on: { SPEAK_COMPLETE: "AnnounceConfidence" },
     },
+    AnnounceConfidence: {
+  entry: ({ context }) => {
+    const confidence = context.lastResult![0].confidence;
+    const utterance =
+      confidence < 0.5
+        ? `The confidence score is ${confidence.toFixed(4)}, which is low.`
+        : `The confidence score is ${confidence.toFixed(4)}, which is good.`;
+
+    context.spstRef.send({ type: "SPEAK", value: { utterance } });
+  },
+  on: { SPEAK_COMPLETE: "Done" }, 
+},
     Done: {
       on: {
         CLICK: "Greeting",
@@ -142,10 +154,15 @@ const dmActor = createActor(dmMachine, {
 }).start();
 
 dmActor.subscribe((state) => {
-  console.group("State update");
-  console.log("State value:", state.value);
-  console.log("State context:", state.context);
-  console.groupEnd();
+  const lastResult = state.context.lastResult;
+  if (lastResult && lastResult[0]) {
+    console.log(
+      "Recognized utterance:",
+      lastResult[0].utterance,
+      "| Confidence:",
+      lastResult[0].confidence
+    );
+  }
 });
 
 export function setupButton(element: HTMLButtonElement) {
