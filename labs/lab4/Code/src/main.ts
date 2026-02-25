@@ -1,5 +1,5 @@
 import "./style.css";
-import { setupButton } from "./dm.ts";
+import { setupButton } from "./dm4.ts";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
