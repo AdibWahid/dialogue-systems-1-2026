@@ -1,0 +1,33 @@
+Recitation at: https://www.youtube.com/watch?v=-TbqRaBY9K0 (Hope is The Thing With Feathers - Emily Dickinson)
+<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" xml:lang="en-US"><voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional">
+
+      <prosody pitch="+1.00%">
+
+<emphasis level="moderate">        “Hope”</emphasis> is the thing with feathers —
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">That perches in the soul —
+<break time="700ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">And sings the tune without the words —
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">And never stops — at all —
+<break time="1000ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">And sweetest — in the Gale — is heard —
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">And sore must be the storm —
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">That could abash the little Bird
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">That kept so many warm —
+<break time="1000ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">I've heard it in the chillest land —
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">And on the strangest Sea —
+<break time="700ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">Yet — never — in Extremity,
+<break time="600ms" /></prosody></mstts:express-as></voice>
+<voice name="en-US-AriaNeural"><mstts:express-as style="narration-professional"><prosody pitch="+1.00%">It asked a crumb — of Me.
+<break time="1200ms" />        
+
+      </prosody>
+
+    </mstts:express-as></voice></speak>
