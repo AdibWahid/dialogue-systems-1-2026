@@ -125,13 +125,17 @@ const dmMachine = setup({
   },
 }).createMachine({
   id: "DM",
-  initial: "Appointment",
+  initial: "Prepare",
   context: ({ spawn }) => ({
-    spstRef: spawn("speechstate", { input: settings }),
+    spstRef: spawn(speechstate, { input: settings }),
     lastResult: null,
     appointmentDetails: {},
   }),
   states: {
+    Prepare: {
+      entry: ({ context }) => context.spstRef.send({ type: "PREPARE" }),
+      on: { ASRTTS_READY: "Appointment" },
+    },
     // Start directly with Appointment
     Appointment: {
       initial: "Prompt",
