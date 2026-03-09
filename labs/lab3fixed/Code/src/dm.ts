@@ -1,4 +1,4 @@
-import { assign, createActor, setup, spawn } from "xstate";
+import { assign, createActor, setup } from "xstate";
 import type { Settings } from "speechstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
@@ -7,7 +7,6 @@ import type { DMContext, DMEvents } from "./types";
 import type { Hypothesis } from "speechstate";
 
 const inspector = createBrowserInspector();
-
 const azureCredentials = {
   endpoint:
     "https://swedencentral.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
@@ -86,6 +85,9 @@ function isInGrammar(utterance: string) {
 }
 
 const dmMachine = setup({
+  actors: {
+    speechstate,
+  },
   types: {
     context: {} as DMContext,
     events: {} as DMEvents,
@@ -101,8 +103,13 @@ const dmMachine = setup({
     hasDenied: ({ context }) => context.metadata?.value === false,
   },
   actions: {
-    "spst.speak": ({ context }, params: { utterance: string }) =>
-      context.spstRef.send({ type: "SPEAK", value: { utterance: params.utterance } }),
+    "spst.speak": ({ context }, params: { utterance: string }) => {
+      console.log("SPEAK SENT:", params.utterance);
+      context.spstRef.send({
+        type: "SPEAK",
+        value: { utterance: params.utterance },
+      });
+    },
     "spst.listen": ({ context }) =>
       context.spstRef.send({ type: "LISTEN" }),
     "spst.recognised": assign(({ event, context }) => {
@@ -117,11 +124,13 @@ const dmMachine = setup({
     "spst.clearData": assign({ lastResult: null, metadata: null }),
   },
 }).createMachine({
-  spstRef: spawn(speechstate, { input: settings }),
-  lastResult: null,
-  appointmentDetails: {},
   id: "DM",
   initial: "Appointment",
+  context: ({ spawn }) => ({
+    spstRef: spawn("speechstate", { input: settings }),
+    lastResult: null,
+    appointmentDetails: {},
+  }),
   states: {
     // Start directly with Appointment
     Appointment: {
@@ -322,5 +331,7 @@ dmActor.subscribe((state) => {
 });
 
 export function setupButton(element: HTMLButtonElement) {
-  element.addEventListener("click", () => dmActor.send({ type: "CLICK" }));
+  element.addEventListener("click", () => {
+    dmActor.send({ type: "CLICK" });
+  });
 }
