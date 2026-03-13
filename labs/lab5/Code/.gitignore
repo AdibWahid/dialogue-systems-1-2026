@@ -31,4 +31,3 @@ package-lock.json
 *.sw?
 
 src/azure.ts
-src/azure.ts
