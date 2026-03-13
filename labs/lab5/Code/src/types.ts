@@ -27,6 +27,7 @@ export interface DMContext {
   lastUtterance?: string;
   metadata?: Record<string, any> | null;
   appointmentDetails?: Record<string, any> | null;
+  interpretation: NLUObject | null;
 }
 
 export type DMEvents =

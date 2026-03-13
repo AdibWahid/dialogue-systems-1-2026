@@ -3,8 +3,9 @@ import type { Settings } from "speechstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
+import { NLU_KEY } from "./azure";
 import type { DMContext, DMEvents } from "./types";
-import type { Hypothesis } from "speechstate";
+import type { Hypothesis, SpeechStateExternalEvent } from "speechstate";
 
 const inspector = createBrowserInspector();
 const azureCredentials = {
@@ -13,7 +14,15 @@ const azureCredentials = {
   key: KEY,
 };
 
+const azureLanguageCredentials = {
+  endpoint: "https://appointmentadib07.cognitiveservices.azure.com/language/:analyze-conversations?api-version=2024-11-15-preview",
+  key: NLU_KEY,
+  deploymentName: "appointment",
+  projectName: "Appointment",
+};
+
 const settings: Settings = {
+  azureLanguageCredentials: azureLanguageCredentials,
   azureCredentials: azureCredentials,
   azureRegion: "swedencentral",
   asrDefaultCompleteTimeout: 0,
@@ -22,67 +31,73 @@ const settings: Settings = {
   ttsDefaultVoice: "en-US-DavisNeural",
 };
 
-interface GrammarEntry {
-  person?: string;
-  day?: string;
-  time?: string;
-  value?: boolean;
-  type?: string;
+function getEntity(context: DMContext, category: string) {
+  return context.interpretation?.entities?.find(
+    (e) => e.category === category
+  )?.text;
 }
 
-const grammar: { [index: string]: GrammarEntry } = {
-  vlad: { person: "Vladislav Maraev" },
-  bora: { person: "Bora Kara" },
-  tal: { person: "Talha Bedir" },
-  tom: { person: "Tom Södahl Bladsjö" },
-  eugene: { person: "Adib Wahid" },
+// function getIntent(context: DMContext) {
+//   return context.interpretation?.topIntent;
+// }
 
-  monday: { day: "Monday" },
-  tuesday: { day: "Tuesday" },
-  wednesday: { day: "Wednesday" },
-  thursday: { day: "Thursday" },
-  friday: { day: "Friday" },
-  saturday: { day: "Saturday" },
-  sunday: { day: "Sunday" },
+// interface GrammarEntry {
+//   person?: string;
+//   day?: string;
+//   time?: string;
+//   value?: boolean;
+//   type?: string;
+// }
 
-  "1": { time: "01:00" },
-  "2": { time: "02:00" },
-  "3": { time: "03:00" },
-  "4": { time: "04:00" },
-  "5": { time: "05:00" },
-  "6": { time: "06:00" },
-  "7": { time: "07:00" },
-  "8": { time: "08:00" },
-  "9": { time: "09:00" },
-  "10": { time: "10:00" },
-  "11": { time: "11:00" },
-  "12": { time: "12:00" },
-  "13": { time: "13:00" },
-  "14": { time: "14:00" },
-  "15": { time: "15:00" },
-  "16": { time: "16:00" },
-  "17": { time: "17:00" },
-  "18": { time: "18:00" },
-  "19": { time: "19:00" },
-  "20": { time: "20:00" },
-  "21": { time: "21:00" },
-  "22": { time: "22:00" },
-  "23": { time: "23:00" },
+// const grammar: { [index: string]: GrammarEntry } = {
+//   vlad: { person: "Vladislav Maraev" },
+//   bora: { person: "Bora Kara" },
+//   tal: { person: "Talha Bedir" },
+//   tom: { person: "Tom Södahl Bladsjö" },
+//   eugene: { person: "Adib Wahid" },
 
-  yes: { value: true },
-  yeah: { value: true },
-  yep: { value: true },
-  yup: { value: true },
+//   monday: { day: "Monday" },
+//   tuesday: { day: "Tuesday" },
+//   wednesday: { day: "Wednesday" },
+//   thursday: { day: "Thursday" },
+//   friday: { day: "Friday" },
+//   saturday: { day: "Saturday" },
+//   sunday: { day: "Sunday" },
 
-  no: { value: false },
-  nope: { value: false },
+//   "1": { time: "01:00" },
+//   "2": { time: "02:00" },
+//   "3": { time: "03:00" },
+//   "4": { time: "04:00" },
+//   "5": { time: "05:00" },
+//   "6": { time: "06:00" },
+//   "7": { time: "07:00" },
+//   "8": { time: "08:00" },
+//   "9": { time: "09:00" },
+//   "10": { time: "10:00" },
+//   "11": { time: "11:00" },
+//   "12": { time: "12:00" },
+//   "13": { time: "13:00" },
+//   "14": { time: "14:00" },
+//   "15": { time: "15:00" },
+//   "16": { time: "16:00" },
+//   "17": { time: "17:00" },
+//   "18": { time: "18:00" },
+//   "19": { time: "19:00" },
+//   "20": { time: "20:00" },
+//   "21": { time: "21:00" },
+//   "22": { time: "22:00" },
+//   "23": { time: "23:00" },
 
-  appointment: { type: "appointment" },
-};
+//   yes: { value: true },
+//   yeah: { value: true },
+//   yep: { value: true },
+//   yup: { value: true },
 
-function isInGrammar(utterance: string) {
-  return utterance.toLowerCase() in grammar;
-}
+//   no: { value: false },
+//   nope: { value: false },
+
+//   appointment: { type: "appointment" },
+// };
 
 const dmMachine = setup({
   actors: {
@@ -93,14 +108,24 @@ const dmMachine = setup({
     events: {} as DMEvents,
   },
   guards: {
-    hasIdentifiedPerson: ({ context }) => !!context.metadata?.person,
-    hasIdentifiedDay: ({ context }) => !!context.metadata?.day,
+    hasIdentifiedPerson: ({ context }) => !!getEntity(context, "person"),
+
+    hasIdentifiedDay: ({ context }) => !!getEntity(context, "day"),
+
     hasIdentifiedWholeDay: ({ context }) =>
-      context.metadata?.value !== undefined,
-    isWholeDay: ({ context }) => context.appointmentDetails?.wholeDay === true,
-    hasIdentifiedTime: ({ context }) => !!context.metadata?.time,
-    hasConfirmed: ({ context }) => context.metadata?.value === true,
-    hasDenied: ({ context }) => context.metadata?.value === false,
+      getEntity(context, "yesno") !== undefined,
+
+    isWholeDay: ({ context }) =>
+      context.appointmentDetails?.wholeDay === true,
+
+    hasIdentifiedTime: ({ context }) =>
+      !!getEntity(context, "time"),
+
+    hasConfirmed: ({ context }) =>
+      getEntity(context, "yesno") === "yes",
+
+    hasDenied: ({ context }) =>
+      getEntity(context, "yesno") === "no",
   },
   actions: {
     "spst.speak": ({ context }, params: { utterance: string }) => {
@@ -111,17 +136,22 @@ const dmMachine = setup({
       });
     },
     "spst.listen": ({ context }) =>
-      context.spstRef.send({ type: "LISTEN" }),
-    "spst.recognised": assign(({ event, context }) => {
-      const recognisedEvent = event as { type: "RECOGNISED"; value: Hypothesis[] };
-      const utterance = recognisedEvent.value[0].utterance.toLowerCase();
+      context.spstRef.send({
+        type: "LISTEN",
+        value: { nlu: true }
+      }),
+    "spst.recognised": assign(({ event}) => {
+      const recognisedEvent = event as any;
+
       return {
         lastResult: recognisedEvent.value,
-        metadata: grammar[utterance] || {},
-        appointmentDetails: context.appointmentDetails,
+        interpretation: recognisedEvent.nluValue ?? null
       };
     }),
-    "spst.clearData": assign({ lastResult: null, metadata: null }),
+    "spst.clearData": assign({
+      lastResult: null,
+      interpretation: null
+    }),
   },
 }).createMachine({
   id: "DM",
@@ -130,6 +160,7 @@ const dmMachine = setup({
     spstRef: spawn(speechstate, { input: settings }),
     lastResult: null,
     appointmentDetails: {},
+    interpretation: null,
   }),
   states: {
     Prepare: {
@@ -140,7 +171,16 @@ const dmMachine = setup({
     Appointment: {
       initial: "Prompt",
       on: {
-        RECOGNISED: { actions: "spst.recognised" },
+        RECOGNISED: [
+          {
+            actions: "spst.recognised",
+            guard: ({ event }) => event.nluValue?.topIntent === "who_is",
+            target: "#DM.WhoIs",
+          },
+          {
+            actions: "spst.recognised"
+          }
+        ],
         ASR_NOINPUT: { target: ".NoInput", actions: "spst.clearData" },
         LISTEN_COMPLETE: ".NoInput",
       },
@@ -186,9 +226,9 @@ const dmMachine = setup({
         PersonIdentified: {
           entry: [
             assign(({ context }) => ({
-              appointmentDetails: { ...context.appointmentDetails, person: context.metadata?.person },
+              appointmentDetails: { ...context.appointmentDetails, person: getEntity(context, "person") },
             })),
-            { type: "spst.speak", params: ({ context }) => ({ utterance: `You are meeting with ${context.metadata?.person}` }) },
+            { type: "spst.speak", params: ({ context }) => ({ utterance: `You are meeting with ${context.appointmentDetails?.person}` }) },
             "spst.clearData",
           ],
           on: { SPEAK_COMPLETE: "PromptDay" },
@@ -212,11 +252,11 @@ const dmMachine = setup({
         DayIdentified: {
           entry: [
             assign(({ context }) => ({
-              appointmentDetails: { ...context.appointmentDetails, day: context.metadata?.day },
+              appointmentDetails: { ...context.appointmentDetails, day: getEntity(context, "day") },
             })),
             {
               type: "spst.speak", params: ({ context }) => ({
-                utterance: `You are meeting with ${context.appointmentDetails?.person} on ${context.metadata?.day}`,
+                utterance: `You are meeting with ${context.appointmentDetails?.person} on ${context.appointmentDetails?.day}`,
               })
             },
             "spst.clearData",
@@ -242,7 +282,7 @@ const dmMachine = setup({
         WholeDayIdentified: {
           entry: [
             assign(({ context }) => ({
-              appointmentDetails: { ...context.appointmentDetails, wholeDay: context.metadata?.value },
+              appointmentDetails: { ...context.appointmentDetails, wholeDay: getEntity(context, "yesno") === "yes" },
             })),
             {
               type: "spst.speak", params: ({ context }) => ({
@@ -277,7 +317,7 @@ const dmMachine = setup({
         TimeIdentified: {
           entry: [
             assign(({ context }) => ({
-              appointmentDetails: { ...context.appointmentDetails, time: context.metadata?.time },
+              appointmentDetails: { ...context.appointmentDetails, time: getEntity(context, "time") },
             })),
             {
               type: "spst.speak", params: ({ context }) => ({
@@ -322,6 +362,30 @@ const dmMachine = setup({
         },
       },
     },
+    WhoIs: {
+      entry: ({ context }) => {
+        const person = getEntity(context, "person") ?? "that person";
+
+        const people: Record<string, string> = {
+          ronaldo: "Cristiano is a famous football player.",
+          einstein: "Albert Einstein was a famous physicist.",
+          "kanye west": "Kanye West is a famous singer."
+        };
+
+        const info =
+          people[person?.toLowerCase() ?? ""] ??
+          `${person} is a well known person.`;
+
+        context.spstRef.send({
+          type: "SPEAK",
+          value: { utterance: info }
+        });
+      },
+
+      on: {
+        SPEAK_COMPLETE: "Done"
+      }
+    },
     Done: {
       on: { CLICK: "Appointment" }, // restart
     },
@@ -332,6 +396,7 @@ const dmActor = createActor(dmMachine, { inspect: inspector.inspect }).start();
 
 dmActor.subscribe((state) => {
   console.log("State update:", state.value, state.context);
+  console.log("NLU:", state.context.interpretation);
 });
 
 export function setupButton(element: HTMLButtonElement) {
